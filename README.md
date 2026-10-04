@@ -1,132 +1,103 @@
 # dsh-langfuse-plugin
 
-Langfuse observability plugin for DeepSeek Harness, providing comprehensive tracing and monitoring for LLM interactions.
+Langfuse observability plugin for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) (DSH). Each completed agent turn is exported as one Langfuse trace through OTLP/HTTP.
+
+The package name is `dsh-langfuse-plugin`. It is a DSH bundle plugin, so install it with `dsh plugin`, rather than with a plain `npm install` command.
+
+## Compatibility
+
+This release is tested with **DeepSeek Harness `0.2.1-alpha.1`** and Node.js **22.12 or later**. It uses the DSH `0.2.1-alpha.1` session and home-path APIs and Cordis `4.0.5-alpha.1`. DSH is in developer preview, so compatibility may change between DSH releases.
 
 ## Features
 
-- 🔍 Automatic tracing of LLM requests and responses
-- 📊 Token usage tracking
-- ⏱️ Latency monitoring
-- 🎯 Session-based trace grouping
-- 🛠️ Full DSH plugin architecture integration
-- 🔄 Support for streaming responses
-- 📝 Request/response payload logging
+- One trace per completed agent turn
+- Tool call and result observations, including tool errors
+- Assistant generation with model and token usage when available
+- Optional prompt capture
+- Fail-open behavior: missing credentials and export failures do not interrupt DSH
+- Direct OTLP/HTTP export without the Langfuse SDK
 
 ## Installation
 
-```bash
-npm install @deepseek-ai/dsh-langfuse-plugin
-```
-
-Or with pnpm:
+From a checkout:
 
 ```bash
-pnpm add @deepseek-ai/dsh-langfuse-plugin
+dsh plugin --profile <profile> add /abs/path/to/dsh-langfuse-plugin
 ```
+
+For a packed release:
+
+```bash
+npm pack
+dsh plugin --profile <profile> add ./dsh-langfuse-plugin-0.1.0.tgz
+```
+
+The package contains `lib/index.js` and the root `cordis.patch.yml`. The patch mounts the plugin with `id: dsh-langfuse-plugin` and `name: dsh-langfuse-plugin`.
+
+## Credentials
+
+Credentials can be configured directly in the Cordis plugin config. When either key is omitted, the remaining fallback sources are checked in this order:
+
+1. `LANGFUSE_PUBLIC_KEY` and `LANGFUSE_SECRET_KEY` environment variables
+2. `$DSH_HOME/langfuse.json` (normally `~/.dsh/langfuse.json`)
+
+```json
+{
+  "publicKey": "pk-lf-...",
+  "secretKey": "sk-lf-..."
+}
+```
+
+When no complete credential pair is available, the plugin stays disabled. Set `debug: true` to log a warning.
 
 ## Configuration
 
-Set up your Langfuse credentials as environment variables:
+Configure the plugin through Cordis:
 
-```bash
-export LANGFUSE_PUBLIC_KEY="your-public-key"
-export LANGFUSE_SECRET_KEY="your-secret-key"
-export LANGFUSE_BASE_URL="https://cloud.langfuse.com"  # Optional, defaults to cloud
+```yaml
+- id: dsh-langfuse-plugin
+  name: dsh-langfuse-plugin
+  config:
+    publicKey: "pk-lf-..."
+    secretKey: "sk-lf-..."
+    baseUrl: "https://cloud.langfuse.com"
+    environment: "development"
+    userId: "user-123"
+    capturePrompts: true
+    timeoutMs: 30000
+    debug: false
 ```
 
-## Usage
+| Field | Default | Description |
+| --- | --- | --- |
+| `publicKey` | fallback | Langfuse project public key. |
+| `secretKey` | fallback | Langfuse project secret key. |
+| `baseUrl` | `https://cloud.langfuse.com` | Langfuse instance URL; self-hosted instances can override it. |
+| `environment` | `development` | Langfuse environment label. |
+| `userId` | unset | Optional user ID attached to traces. |
+| `capturePrompts` | `true` | Set to `false` to omit user prompts while preserving trace structure. |
+| `timeoutMs` | `30000` | Export timeout and shutdown drain budget, in milliseconds. |
+| `debug` | `false` | Include diagnostic details in warnings. |
 
-### Basic Setup
+## Trace contents
 
-Add the plugin to your DSH configuration:
+For each `turn/end`, the plugin sends one OTLP document containing a root `DSH Turn` observation, a `dsh.assistant` generation, and one `tool.<name>` observation per tool call. Failed tools and `agent/error` events are marked as errors.
 
-```typescript
-import { Context } from '@deepseek-ai/cordis'
-import { LangfusePlugin } from '@deepseek-ai/dsh-langfuse-plugin'
-
-const ctx = new Context()
-
-ctx.plugin(LangfusePlugin, {
-  publicKey: process.env.LANGFUSE_PUBLIC_KEY,
-  secretKey: process.env.LANGFUSE_SECRET_KEY,
-  baseUrl: process.env.LANGFUSE_BASE_URL,
-  enabled: true,
-  flushInterval: 5000, // Optional: flush interval in ms
-})
-```
-
-### Configuration Options
-
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `publicKey` | `string` | - | Langfuse public key (required) |
-| `secretKey` | `string` | - | Langfuse secret key (required) |
-| `baseUrl` | `string` | `https://cloud.langfuse.com` | Langfuse API base URL |
-| `enabled` | `boolean` | `true` | Enable/disable tracing |
-| `flushInterval` | `number` | `5000` | Flush interval in milliseconds |
-| `traceMetadata` | `object` | `{}` | Additional metadata for all traces |
-
-## How It Works
-
-The plugin automatically:
-
-1. **Intercepts LLM calls** - Hooks into DSH's LLM adapter lifecycle
-2. **Creates traces** - Generates Langfuse traces with hierarchical spans
-3. **Tracks metrics** - Records token usage, latency, and model information
-4. **Groups by session** - Associates traces with DSH session IDs
-5. **Handles streaming** - Correctly captures streaming response chunks
-
-## Architecture
-
-This plugin follows DSH's plugin architecture patterns:
-
-- Uses Cordis service injection for lifecycle management
-- Implements event-based tracing hooks
-- Respects DSH's adapter abstraction layer
-- Compatible with all DSH-supported LLM providers
+The event assembler consumes `turn/start`, `user/message`, `request/context`, `request/header`, `tool/call`, `tool/result`, `assistant/message`, and `turn/end` events. Unknown or malformed events are ignored safely.
 
 ## Development
 
 ```bash
-# Install dependencies
-pnpm install
-
-# Build
-pnpm run build
-
-# Watch mode
-pnpm run dev
-
-# Type check
-pnpm run typecheck
+npm install
+npm run typecheck
+npm run build
 ```
 
-## Contributing
-
-Contributions are welcome! Please ensure:
-
-- TypeScript strict mode compliance
-- Follow DSH plugin conventions
-- Add tests for new features
-- Update documentation
-
-## Resources
-
-- [Langfuse Documentation](https://langfuse.com/docs)
-- [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)
-- [Langfuse JS/TS SDK](https://langfuse.com/guides/cookbook/js_langfuse_sdk)
+- `src/turn-tracker.ts`: assembles session events into turn traces
+- `src/otlp-sink.ts`: encodes and sends OTLP/JSON
+- `src/plugin.ts`: Cordis service and event wiring
+- `src/credentials.ts`: environment and `$DSH_HOME` credential lookup
 
 ## License
 
-MIT - see [LICENSE](LICENSE) file for details
-
-## Support
-
-For issues and questions:
-- File an issue on GitHub
-- Check Langfuse and DSH documentation
-- Join the DeepSeek Harness community
-
----
-
-**Note**: This is an independent plugin and is not officially maintained by DeepSeek AI or Langfuse.
+MIT

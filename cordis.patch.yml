@@ -1,0 +1,8 @@
+# dsh-langfuse-plugin bundle patch: mounts the plugin into the base-backed
+# profile. The row's `name` resolves this package's default export
+# (lib/index.js); the plugin also reads its credentials from the environment
+# or $DSH_HOME/langfuse.json at mount time.
+- insert:
+    - id: dsh-langfuse-plugin
+      name: dsh-langfuse-plugin
+      config: {}

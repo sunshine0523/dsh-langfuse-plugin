@@ -9,21 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Initial release of dsh-langfuse-plugin
-- Automatic tracing of LLM requests and responses
-- Token usage tracking
-- Latency monitoring
-- Session-based trace grouping
-- Support for streaming responses
-- Configurable flush intervals
-- Custom metadata support
-- Error tracking and reporting
-- Full DSH plugin architecture integration
+- Event-based turn tracing through the native DSH Cordis plugin lifecycle
+- OTLP/HTTP export to Langfuse with tool and generation observations
+- Fail-open credential and network error handling
+- Cordis configuration for Langfuse credentials and endpoint
 
-### Features
-- Langfuse SDK integration
-- Event-based lifecycle hooks
-- Cordis service injection
-- TypeScript strict mode support
-- Comprehensive documentation
-
-[0.1.0]: https://github.com/yourusername/dsh-langfuse-plugin/releases/tag/v0.1.0
+[0.1.0]: https://github.com/sunshine0523/dsh-langfuse-plugin/releases/tag/v0.1.0
