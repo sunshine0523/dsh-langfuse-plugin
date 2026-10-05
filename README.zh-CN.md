@@ -6,7 +6,7 @@
 
 ## 兼容性
 
-当前版本已使用 **DeepSeek Harness `0.2.1-alpha.1`** 和 Node.js **22.12 或更高版本**测试。依赖 DSH `0.2.1-alpha.1` 的 session、home-path API，以及 Cordis `4.0.5-alpha.1`。DSH 仍处于开发预览阶段，不同 DSH 版本之间可能存在兼容性变化。
+当前版本已使用 **DeepSeek Harness `0.2.0-rc.2`** 和 Node.js **22.12 或更高版本**测试。依赖 DSH `0.2.0-rc.2` 的 session、home-path API，以及 Cordis `4.0.4` 和 Schemastery `3.18.4`。DSH 仍处于开发预览阶段，不同 DSH 版本之间可能存在兼容性变化。
 
 ## 功能
 
@@ -35,7 +35,7 @@ dsh plugin --profile <profile> add /abs/path/to/dsh-langfuse-plugin
 
 ```bash
 npm pack
-dsh plugin --profile <profile> add ./dsh-langfuse-plugin-0.1.0.tgz
+dsh plugin --profile <profile> add ./dsh-langfuse-plugin-0.1.2.tgz
 ```
 
 包内包含 `lib/index.js` 和根目录的 `cordis.patch.yml`。patch 使用 `id: dsh-langfuse-plugin` 和 `name: dsh-langfuse-plugin` 挂载插件。

@@ -6,7 +6,7 @@ The package name is `dsh-langfuse-plugin`. It is a DSH bundle plugin, so install
 
 ## Compatibility
 
-This release is tested with **DeepSeek Harness `0.2.1-alpha.1`** and Node.js **22.12 or later**. It uses the DSH `0.2.1-alpha.1` session and home-path APIs and Cordis `4.0.5-alpha.1`. DSH is in developer preview, so compatibility may change between DSH releases.
+This release is tested with **DeepSeek Harness `0.2.0-rc.2`** and Node.js **22.12 or later**. It uses the DSH `0.2.0-rc.2` session and home-path APIs, Cordis `4.0.4`, and Schemastery `3.18.4`. DSH is in developer preview, so compatibility may change between DSH releases.
 
 ## Features
 
@@ -35,7 +35,7 @@ For a packed release:
 
 ```bash
 npm pack
-dsh plugin --profile <profile> add ./dsh-langfuse-plugin-0.1.0.tgz
+dsh plugin --profile <profile> add ./dsh-langfuse-plugin-0.1.2.tgz
 ```
 
 The package contains `lib/index.js` and the root `cordis.patch.yml`. The patch mounts the plugin with `id: dsh-langfuse-plugin` and `name: dsh-langfuse-plugin`.
