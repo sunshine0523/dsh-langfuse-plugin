@@ -1,6 +1,6 @@
 {
   "name": "dsh-langfuse-plugin",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Langfuse tracing plugin for DeepSeek Harness (DSH).",
   "license": "MIT",
   "repository": {
