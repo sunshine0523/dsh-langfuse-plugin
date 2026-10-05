@@ -19,6 +19,12 @@ This release is tested with **DeepSeek Harness `0.2.1-alpha.1`** and Node.js **2
 
 ## Installation
 
+Install the published package:
+
+```bash
+dsh plugin --profile <profile> add dsh-langfuse-plugin
+```
+
 From a checkout:
 
 ```bash

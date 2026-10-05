@@ -19,6 +19,12 @@
 
 ## 安装
 
+安装已发布的 npm 包：
+
+```bash
+dsh plugin --profile <profile> add dsh-langfuse-plugin
+```
+
 从源码目录安装：
 
 ```bash
